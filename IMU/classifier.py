@@ -27,10 +27,8 @@ RAD_TO_DEG = 57.29578
 M_PI = 3.14159265358979323846
 G_GAIN = 0.070          # [deg/s/LSB]  If you change the dps for gyro, you need to update this value accordingly
 AA =  0.40              # Complementary filter constant
-MAG_LPF_FACTOR = 0.4    # Low pass filter constant magnetometer
 ACC_LPF_FACTOR = 0.4    # Low pass filter constant for accelerometer
 ACC_MEDIANTABLESIZE = 9         # Median filter table size for accelerometer. Higher = smoother but a longer delay
-MAG_MEDIANTABLESIZE = 9         # Median filter table size for magnetometer. Higher = smoother but a longer delay
 
 GYRO_X_LIFT = 50
 GYRO_Y_LIFT = 40
@@ -57,34 +55,24 @@ magYmax =  0
 magZmax =  0
 
 sio = socketio.Client()
-
-'''
-Here is an example:
-magXmin =  -1748
-magYmin =  -1025
-magZmin =  -1876
-magXmax =  959
-magYmax =  1651
-magZmax =  708
-Dont use the above values, these are just an example.
-'''
 ############### END Calibration offsets #################
 
 
 def print_title():
     print(r"""
 
-░██████╗░█████╗░██████╗░██████╗░██████╗░██╗░░░░░███████╗░░░
-██╔════╝██╔══██╗██╔══██╗██╔══██╗██╔══██╗██║░░░░░██╔════╝░░░
-╚█████╗░██║░░╚═╝██████╔╝██████╦╝██████╦╝██║░░░░░█████╗░░░░░
-░╚═══██╗██║░░██╗██╔══██╗██╔══██╗██╔══██╗██║░░░░░██╔══╝░░░░░
-██████╔╝╚█████╔╝██║░░██║██████╦╝██████╦╝███████╗███████╗██╗
-╚═════╝░░╚════╝░╚═╝░░╚═╝╚═════╝░╚═════╝░╚══════╝╚══════╝╚═╝                                                                                        
+░██████╗░█████╗░██████╗░██████╗░██████╗░██╗░░░░░░░░
+██╔════╝██╔══██╗██╔══██╗██╔══██╗██╔══██╗██║░░░░░░░░
+╚█████╗░██║░░╚═╝██████╔╝██████╦╝██████╦╝██║░░░░░░░░
+░╚═══██╗██║░░██╗██╔══██╗██╔══██╗██╔══██╗██║░░░░░░░░
+██████╔╝╚█████╔╝██║░░██║██████╦╝██████╦╝███████╗██╗
+╚═════╝░░╚════╝░╚═╝░░╚═╝╚═════╝░╚═════╝░╚══════╝╚═╝                                                                                        
         """)
 
 def send_gestures():
     print_title()
     
+    #Check to ensure user is already in a game room before prompting for username input and proceeding to run code.
     room_check = 1
     while room_check:
         joined_room = input("Have you joined a game room? (y/n)\n")
@@ -92,23 +80,16 @@ def send_gestures():
             room_check = 0
         elif joined_room == "n":
             print("Not so fast! Please join a room before continuing.\n")
-        else
+        else:
             print("Sorry, I didn't get that. Please only type 'y' for yes or 'n' for no.\n")
         
-
+    #Once user has confirmed they have joined a room, prompt for username input.
     username = input("What is your username?\n")
 
-
+    #Callout to server to link data stream to game user.
     sio.emit('setName', username+"8")
 
-
     # Filter variables
-    gyroXangle = 0.0
-    gyroYangle = 0.0
-    gyroZangle = 0.0
-    oldXMagRawValue = 0
-    oldYMagRawValue = 0
-    oldZMagRawValue = 0
     oldXAccRawValue = 0
     oldYAccRawValue = 0
     oldZAccRawValue = 0
@@ -122,12 +103,6 @@ def send_gestures():
     acc_medianTable2X = [1] * ACC_MEDIANTABLESIZE
     acc_medianTable2Y = [1] * ACC_MEDIANTABLESIZE
     acc_medianTable2Z = [1] * ACC_MEDIANTABLESIZE
-    mag_medianTable1X = [1] * MAG_MEDIANTABLESIZE
-    mag_medianTable1Y = [1] * MAG_MEDIANTABLESIZE
-    mag_medianTable1Z = [1] * MAG_MEDIANTABLESIZE
-    mag_medianTable2X = [1] * MAG_MEDIANTABLESIZE
-    mag_medianTable2Y = [1] * MAG_MEDIANTABLESIZE
-    mag_medianTable2Z = [1] * MAG_MEDIANTABLESIZE
 
     IMU.detectIMU()     # Detect if BerryIMU is connected.
     if(IMU.BerryIMUversion == 99):
@@ -135,50 +110,22 @@ def send_gestures():
         sys.exit()
     IMU.initIMU()       # Initialise the accelerometer, gyroscope and compass
 
-    gyrox_list = [0] * 5
-    gyroy_list = [0] * 5
-    gyroz_list = [0] * 5
-
-    clf_action = "None"
+    action = "None"
     action_list = ["None"] * 5
 
     while True:
-        #Read the accelerometer,gyroscope and magnetometer values
+        #Read the accelerometer
         ACCx = IMU.readACCx()
         ACCy = IMU.readACCy()
         ACCz = IMU.readACCz()
-        GYRx = IMU.readGYRx()
-        GYRy = IMU.readGYRy()
-        GYRz = IMU.readGYRz()
-        MAGx = IMU.readMAGx()
-        MAGy = IMU.readMAGy()
-        MAGz = IMU.readMAGz()
-
-        #Apply compass calibration
-        MAGx -= (magXmin + magXmax) / 2
-        MAGy -= (magYmin + magYmax) / 2
-        MAGz -= (magZmin + magZmax) / 2
-
-
-        #Calculate loop Period(LP). How long between Gyro Reads
-        b = datetime.datetime.now() - a
-        a = datetime.datetime.now()
-        LP = b.microseconds/(1000000*1.0)
-        outputString = "Loop Time %5.2f " % ( LP )
 
         ###############################################
-        #### Apply low pass filter ####
+        #### Apply low pass filter                 ####
         ###############################################
-        MAGx =  MAGx  * MAG_LPF_FACTOR + oldXMagRawValue*(1 - MAG_LPF_FACTOR);
-        MAGy =  MAGy  * MAG_LPF_FACTOR + oldYMagRawValue*(1 - MAG_LPF_FACTOR);
-        MAGz =  MAGz  * MAG_LPF_FACTOR + oldZMagRawValue*(1 - MAG_LPF_FACTOR);
         ACCx =  ACCx  * ACC_LPF_FACTOR + oldXAccRawValue*(1 - ACC_LPF_FACTOR);
         ACCy =  ACCy  * ACC_LPF_FACTOR + oldYAccRawValue*(1 - ACC_LPF_FACTOR);
         ACCz =  ACCz  * ACC_LPF_FACTOR + oldZAccRawValue*(1 - ACC_LPF_FACTOR);
 
-        oldXMagRawValue = MAGx
-        oldYMagRawValue = MAGy
-        oldZMagRawValue = MAGz
         oldXAccRawValue = ACCx
         oldYAccRawValue = ACCy
         oldZAccRawValue = ACCz
@@ -186,6 +133,7 @@ def send_gestures():
         #########################################
         #### Median filter for accelerometer ####
         #########################################
+
         # cycle the table
         for x in range (ACC_MEDIANTABLESIZE-1,0,-1 ):
             acc_medianTable1X[x] = acc_medianTable1X[x-1]
@@ -212,122 +160,37 @@ def send_gestures():
         ACCy = acc_medianTable2Y[int(ACC_MEDIANTABLESIZE/2)];
         ACCz = acc_medianTable2Z[int(ACC_MEDIANTABLESIZE/2)];
 
-        #########################################
-        #### Median filter for magnetometer ####
-        #########################################
-        # cycle the table
-        for x in range (MAG_MEDIANTABLESIZE-1,0,-1 ):
-            mag_medianTable1X[x] = mag_medianTable1X[x-1]
-            mag_medianTable1Y[x] = mag_medianTable1Y[x-1]
-            mag_medianTable1Z[x] = mag_medianTable1Z[x-1]
-
-        # Insert the latest values
-        mag_medianTable1X[0] = MAGx
-        mag_medianTable1Y[0] = MAGy
-        mag_medianTable1Z[0] = MAGz
-
-        # Copy the tables
-        mag_medianTable2X = mag_medianTable1X[:]
-        mag_medianTable2Y = mag_medianTable1Y[:]
-        mag_medianTable2Z = mag_medianTable1Z[:]
-
-        # Sort table 2
-        mag_medianTable2X.sort()
-        mag_medianTable2Y.sort()
-        mag_medianTable2Z.sort()
-
-        # The middle value is the value we are interested in
-        MAGx = mag_medianTable2X[int(MAG_MEDIANTABLESIZE/2)];
-        MAGy = mag_medianTable2Y[int(MAG_MEDIANTABLESIZE/2)];
-        MAGz = mag_medianTable2Z[int(MAG_MEDIANTABLESIZE/2)];
-
-        #Convert Gyro raw to degrees per second
-        rate_gyr_x =  GYRx * G_GAIN
-        rate_gyr_y =  GYRy * G_GAIN
-        rate_gyr_z =  GYRz * G_GAIN
-
-        #Calculate the angles from the gyro.
-        gyroXangle+=rate_gyr_x*LP
-        gyroYangle+=rate_gyr_y*LP
-        gyroZangle+=rate_gyr_z*LP
 
         ######################## START Thresholding #########################
+        if ACCz < -4100:
+            action = "Upward Lift"
+            sio.emit('gesture_detected', action)
+            sio.sleep(0.5)
+        elif ACCy > 2500 and ACCz < 2500:
+            action = "Rightward Tilt"
+            sio.emit('gesture_detected', action)
+            sio.sleep(0.5)
+        elif ACCy < -2500 and ACCz < -500:
+            action = "Leftward Tilt"
+            sio.emit('gesture_detected', action)
+            sio.sleep(0.5)
+        elif ACCx > 2500 and ACCz < 2500:
+            action = "Forward Tilt"
+            sio.emit('gesture_detected', action)
+            sio.sleep(0.5)
+        elif ACCx < -2500 and ACCz < 2500:
+            action = "Backward Tilt"
+            sio.emit('gesture_detected', action)
+            sio.sleep(0.5)
+        elif (abs(ACCx - oldACCx) < 50.0) & (abs(ACCy - oldACCy) < 50.0) & (abs(ACCz - oldACCz) < 50.0):
+            action = "Idle"
+            sio.emit('gesture_detected', action)
+            sio.sleep(0.5)
 
-        gyrox_list = [gyroXangle] + gyrox_list
-        gyrox_list.pop()
-
-        gyroy_list = [gyroYangle] + gyroy_list
-        gyroy_list.pop()
-
-        gyroz_list = [gyroZangle] + gyroz_list
-        gyroz_list.pop()
-
-        max_gyrox = max(gyrox_list)
-        max_gyrox_index = gyrox_list.index(max_gyrox)
-        min_gyrox = min(gyrox_list)
-        min_gyrox_index = gyrox_list.index(min_gyrox)
-
-        max_gyroy = max(gyroy_list)
-        max_gyroy_index = gyroy_list.index(max_gyroy)
-        min_gyroy = min(gyroy_list)
-        min_gyroy_index = gyroy_list.index(min_gyroy)
-
-        max_gyroz = max(gyroz_list)
-        max_gyroz_index = gyroz_list.index(max_gyroz)
-        min_gyroz = min(gyroz_list)
-        min_gyroz_index = gyroz_list.index(min_gyroz)
-
-        max_gyrox_diff = max_gyrox - min_gyrox
-        max_gyroy_diff = max_gyroy - min_gyroy
-        max_gyroz_diff = max_gyroz - min_gyroz
-
-        if max_gyrox_diff > GYRO_X_LIFT and max_gyroy_diff < GYRO_Y_LIFT and max_gyroz_diff < GYRO_Z_LIFT:
-            if min_gyrox_index < max_gyrox_index and action_list.count("None") > 4:
-                clf_action = "Upward_Lift"
-
-                sio.emit('gesture_detected', clf_action)
-                sio.sleep(0.5)
-            else:
-                clf_action = "None"
-        elif max_gyroy_diff > GYRO_Y_TWIST and max_gyrox_diff < GYRO_X_TWIST and max_gyroz_diff < GYRO_Z_TWIST: 
-            if min_gyroy_index < max_gyroy_index and action_list.count("None") > 4:
-                clf_action = "Clockwise_Twist"
-
-                sio.emit('gesture_detected', clf_action)
-                sio.sleep(0.5)
-            else:
-                clf_action = "None"
-        elif max_gyroz_diff > GYRO_Z_CHOP and max_gyrox_diff < GYRO_X_CHOP and max_gyroy_diff < GYRO_Y_CHOP:
-            if min_gyroz_index < max_gyroz_index and action_list.count("None") > 4:
-                clf_action = "Vertical_Chop"
-
-                sio.emit('gesture_detected', clf_action)
-                sio.sleep(0.5)
-            else:
-                clf_action = "None"
-        else:
-            clf_action = "None"
-
-        action_list = [clf_action] + action_list
+        action_list = [action] + action_list
         action_list.pop()
 
-        print("Classifier action:", clf_action)
-
-        if clf_action is "Upward_Lift":
-            for i in range(5):
-                gyrox_list = [gyroXangle] + gyrox_list
-                gyrox_list.pop()
-
-        if clf_action is "Clockwise_Twist":
-            for i in range(5):
-                gyroy_list = [gyroYangle] + gyroy_list
-                gyroy_list.pop()
-
-        if clf_action is "Vertical_Chop":
-            for i in range(5):
-                gyroz_list = [gyroZangle] + gyroz_list
-                gyroz_list.pop()
-
+        print("Detected: ", action)
         time.sleep(0.05)
 
 @sio.event
