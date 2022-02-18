@@ -25,6 +25,7 @@ script: [
         </h2>
       </div>
 
+      <!-- Leaderboard Block -->
       <div class="column is-3">
         <div class="card">
           <header class="card-header">
@@ -55,7 +56,9 @@ script: [
           </footer>
         </div>
 
-        <!-- <div class="card card--painter">
+        <!-- 
+        <!-- Powerups Block -->
+        <div class="card card--painter">
           <header class="card-header">
             <p class="card-header-title">⚡</p>
           </header>
@@ -79,6 +82,8 @@ script: [
           </div>
         </div> -->
 
+        <!-- Word Choice Block -->
+        <!-- only appears if it is player's turn to draw and they haven't chosen yet-->
         <div
           class="card card--painter"
           v-if="iDraw && !roundStarted && words.length > 0"
@@ -108,6 +113,7 @@ script: [
           </div>
         </div>
 
+        <!-- only appears if it is player's turn to draw and they've chosen the word-->
         <div class="card card--painter" v-if="iDraw && roundStarted">
           <header class="card-header">
             <div class="card-header-title">
@@ -139,6 +145,7 @@ script: [
 
       <whiteboard id="whiteboardID" :iDraw="iDraw" :started="roundStarted"/>
 
+      <!-- Chat Block -->
       <div class="column is-3" id="chat">
         <div class="card chat">
           <header class="card-header">
@@ -172,6 +179,7 @@ script: [
               </li>
             </ul>
           </div>
+          <!-- guess/message input section -->
           <footer class="card-footer">
             <form class="field has-addons chat-input" @submit="sendMessage">
               <div class="control">
@@ -194,7 +202,9 @@ script: [
         </div>
 
 
-        <!-- <div class="card card--painter">
+        <!-- 
+        <!-- Audio Input Button Maybe -->
+        <div class="card card--painter">
           <header class="card-header card-audio">
             <p id="headerAudio" class="card-header-title">🔈</p>
             <div class="control control-video">

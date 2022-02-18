@@ -1,2 +1,2 @@
 # Team6
-a scribbl.io inspired hand-free drawing game
+a skribbl.io inspired hand-free drawing game
