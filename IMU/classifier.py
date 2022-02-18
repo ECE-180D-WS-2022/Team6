@@ -42,17 +42,10 @@ GYRO_X_CHOP = 40
 GYRO_Y_CHOP = 40
 GYRO_Z_CHOP = 50
 
-################# Compass Calibration values ############
-# Use calibrateBerryIMU.py to get calibration values
-# Calibrating the compass isnt mandatory, however a calibrated
-# compass will result in a more accurate heading value.
-
-magXmin =  0
-magYmin =  0
-magZmin =  0
-magXmax =  0
-magYmax =  0
-magZmax =  0
+#Initialize Idle Detection Values (ADDED CODE)
+oldACCx = 0.0
+oldACCy = 0.0
+oldACCz = 0.0
 
 sio = socketio.Client()
 ############### END Calibration offsets #################
@@ -161,7 +154,7 @@ def send_gestures():
         ACCz = acc_medianTable2Z[int(ACC_MEDIANTABLESIZE/2)];
 
 
-        ######################## START Thresholding #########################
+        ######################## Classifier magic happening here #########################
         if ACCz < -4100:
             action = "Upward Lift"
             sio.emit('gesture_detected', action)
@@ -187,12 +180,21 @@ def send_gestures():
             sio.emit('gesture_detected', action)
             sio.sleep(0.5)
 
+
+        #Update old ACC values.
+        oldACCx = ACCx
+        oldACCy = ACCy
+        oldACCz = ACCz
+
+        #Update actions list.
         action_list = [action] + action_list
         action_list.pop()
 
+        #Print to console & pause.
         print("Detected: ", action)
         time.sleep(0.05)
 
+#SocketIO communcation.
 @sio.event
 def connect():
     print('connection established')
