@@ -42,15 +42,10 @@ GYRO_X_CHOP = 40
 GYRO_Y_CHOP = 40
 GYRO_Z_CHOP = 50
 
-#Initialize Idle Detection Values (ADDED CODE)
-oldACCx = 0.0
-oldACCy = 0.0
-oldACCz = 0.0
-
 sio = socketio.Client()
 ############### END Calibration offsets #################
 
-
+#Just a wee lil' helper function to print an ASCII Title.
 def print_title():
     print(r"""
 
@@ -62,7 +57,10 @@ def print_title():
 ╚═════╝░░╚════╝░╚═╝░░╚═╝╚═════╝░╚═════╝░╚══════╝╚═╝                                                                                        
         """)
 
+
+#The MAIN beefy beefer of a function.
 def send_gestures():
+    #Print an awesome ACSII Title
     print_title()
     
     #Check to ensure user is already in a game room before prompting for username input and proceeding to run code.
@@ -87,7 +85,10 @@ def send_gestures():
     oldYAccRawValue = 0
     oldZAccRawValue = 0
 
-    a = datetime.datetime.now()
+    #Initialize Idle Detection Values
+    oldACCx = 0.0
+    oldACCy = 0.0
+    oldACCz = 0.0
 
     #Setup the tables for the mdeian filter. Fill them all with '1' so we dont get devide by zero error
     acc_medianTable1X = [1] * ACC_MEDIANTABLESIZE
