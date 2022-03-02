@@ -56,8 +56,8 @@ script: [
           </footer>
         </div>
 
-        <!-- 
         <!-- Powerups Block -->
+        <!--
         <div class="card card--painter">
           <header class="card-header">
             <p class="card-header-title">⚡</p>
@@ -202,8 +202,8 @@ script: [
         </div>
 
 
-        <!-- 
         <!-- Audio Input Button Maybe -->
+        <!-- 
         <div class="card card--painter">
           <header class="card-header card-audio">
             <p id="headerAudio" class="card-header-title">🔈</p>
