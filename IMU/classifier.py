@@ -157,23 +157,23 @@ def send_gestures():
 
         ######################## Classifier magic happening here #########################
         if ACCz < -4100:
-            action = "Upward Lift"
+            action = "Upward_Lift"
             sio.emit('gesture_detected', action)
             sio.sleep(0.5)
         elif ACCy > 2500 and ACCz < 2500:
-            action = "Rightward Tilt"
+            action = "Right_Tilt"
             sio.emit('gesture_detected', action)
             sio.sleep(0.5)
         elif ACCy < -2500 and ACCz < -500:
-            action = "Leftward Tilt"
+            action = "Left_Tilt"
             sio.emit('gesture_detected', action)
             sio.sleep(0.5)
         elif ACCx > 2500 and ACCz < 2500:
-            action = "Forward Tilt"
+            action = "Forward_Tilt"
             sio.emit('gesture_detected', action)
             sio.sleep(0.5)
         elif ACCx < -2500 and ACCz < 2500:
-            action = "Backward Tilt"
+            action = "Backward_Tilt"
             sio.emit('gesture_detected', action)
             sio.sleep(0.5)
         elif (abs(ACCx - oldACCx) < 50.0) & (abs(ACCy - oldACCy) < 50.0) & (abs(ACCz - oldACCz) < 50.0):
