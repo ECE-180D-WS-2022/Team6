@@ -156,45 +156,37 @@ def send_gestures():
 
 
         ######################## Classifier magic happening here #########################
-        if ACCz < -4100:
-            if action_list.count("Idle") > 4:
-                action = "Upward_Lift"
-                sio.emit('gesture_detected', action)
-                sio.sleep(0.5)
-            else:
-                action = "Idle"
-        elif ACCy > 2500 and ACCz < 2500:
-            if action_list.count("Idle") > 4:
+    
+        if ACCy > 2500 and ACCz < 2500:
+            if action_list.count("None") > 4:
                 action = "Right_Tilt"
                 sio.emit('gesture_detected', action)
                 sio.sleep(0.5)
             else:
-                action = "Idle"
+                action = "None"
         elif ACCy < -2500 and ACCz < -500:
-            if action_list.count("Idle") > 4:
+            if action_list.count("None") > 4:
                 action = "Left_Tilt"
                 sio.emit('gesture_detected', action)
                 sio.sleep(0.5)
             else:
-                action = "Idle"
+                action = "None"
         elif ACCx > 2500 and ACCz < 2500:
-            if action_list.count("Idle") > 4:
+            if action_list.count("None") > 4:
                 action = "Forward_Tilt"
                 sio.emit('gesture_detected', action)
                 sio.sleep(0.5)
             else:
-                action = "Idle"
+                action = "None"
         elif ACCx < -2500 and ACCz < 2500:
-            if action_list.count("Idle") > 4:
+            if action_list.count("None") > 4:
                 action = "Backward_Tilt"
                 sio.emit('gesture_detected', action)
                 sio.sleep(0.5)
             else:
-                action = "Idle"
-        elif (abs(ACCx - oldACCx) < 50.0) & (abs(ACCy - oldACCy) < 50.0) & (abs(ACCz - oldACCz) < 50.0):
-                action = "Idle"
-                sio.emit('gesture_detected', action)
-                sio.sleep(0.5)
+                action = "None"
+        else:
+            action = "None"
 
 
         #Update old ACC values.
