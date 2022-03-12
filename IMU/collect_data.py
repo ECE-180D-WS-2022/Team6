@@ -201,6 +201,8 @@ for sensor in ["accel_", "gyro_", "CF_angle_", "kalman_"]:
     header.append(sensor + "_y")
     if sensor is "gyro_":
         header.append(sensor + "_z")
+    if sensor is "accel_":
+        header.append(sensor + "_z")
 header.append("comp_heading")
 header.append("heading")
 
@@ -397,7 +399,7 @@ while True:
 
         ######################## START SAVING DATA #########################
 
-        accel = [AccXangle, AccYangle]
+        accel = [ACCx, ACCy, ACCz]
         gyro = [gyroXangle, gyroYangle, gyroZangle]
         cf_angle = [CFangleX, CFangleY]
         kalman = [kalmanX, kalmanY]
