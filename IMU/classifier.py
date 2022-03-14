@@ -164,7 +164,7 @@ def send_gestures():
                 sio.sleep(0.5)
             else:
                 action = "None"
-        elif ACCy < -2500 and ACCz < -500:
+        elif ACCy < -2500 and ACCz < -2500:
             if action_list.count("None") > 4:
                 action = "Left_Tilt"
                 sio.emit('gesture_detected', action)

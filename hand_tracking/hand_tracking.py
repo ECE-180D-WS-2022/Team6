@@ -61,9 +61,6 @@ def send_coordinates():
     pTime = 0
     cTime = 0
 
-    action = "None"
-    action_list = ["None"] * 5
-
     while True:
         success, img = cap.read()
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -93,9 +90,9 @@ def send_coordinates():
         fps = 1/(cTime-pTime)
         pTime = cTime
 
-        cv2.putText(img,str(int(fps)), (10,70), cv2.FONT_HERSHEY_PLAIN, 3, (255,0,255), 3)
+        #cv2.putText(img,str(int(fps)), (10,70), cv2.FONT_HERSHEY_PLAIN, 3, (255,0,255), 3)
 
-        cv2.imshow("Image", img)
+        cv2.imshow("Image", cv2.flip(img,1))
         
         k = cv2.waitKey(1) & 0xFF
         if k == 27:
