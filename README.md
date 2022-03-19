@@ -33,6 +33,10 @@ Alyssa Simmons <br />
 Alexander Tan <br />
 Brenden Towell <br />
 
+## Hosted Repositories
+https://github.com/jahjahblinks/scrbbl-server
+https://github.com/jahjahblinks/scrbbl-client
+
 ## Acknowledgments
 
 Inspiration, code snippets, etc.
