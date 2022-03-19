@@ -4,23 +4,23 @@ A skribbl.io inspired hand-free drawing game utilizing IMU gestures, speech proc
 
 ## Description
 
-An in-depth paragraph about your project and overview of use.
+In-depth description and overview, WIP.
 
 ## Getting Started
 
 ### Dependencies
 
-* Describe any prerequisites, libraries, OS version, etc., needed before installing program.
-* ex. Windows 10
+* Python (libraries required WIP)
+* Microphone
+* Video Source (Webcam OK)
 
 ### Installing
 
-* How/where to download your program
-* Any modifications needed to be made to files/folders
+* Installation instructions WIP.
 
 ### Executing program
 
-* How to run the program
+* How to run the program, WIP.
 * Step-by-step bullets, TBD.
 ```
 code blocks TBD
@@ -28,10 +28,10 @@ code blocks TBD
 
 ## Authors
 
-Elijah Simas
-Alyssa Simmons
-Alexander Tan
-Brenden Towell
+Elijah Simas <br />
+Alyssa Simmons <br />
+Alexander Tan <br />
+Brenden Towell <br />
 
 ## Acknowledgments
 
