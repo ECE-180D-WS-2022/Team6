@@ -1,1 +1,1 @@
-Hand tracking files are located here.
+Hand tracking files are located here, and were drawn primarily from https://google.github.io/mediapipe/. Currently, the script pairs with a user on the website, then sends coordinates of the index finger over SocketIO. In the future, we hope to make it such that running a seperate application client side is no longer required, and there are also some improvements to efficiency that could be made, such as pausing the script when the user is not the drawer.
