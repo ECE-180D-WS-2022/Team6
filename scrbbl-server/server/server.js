@@ -53,6 +53,9 @@ io.on("connection", socket => {
       CHAT.sendServerMessage(data.id, `${socket.name} has joined the game!`);
       let room = ROOMS.getRoom(data.id);
       if (room.round != null) {
+        /* 
+        socket.emit('getPainting', {lineHistory: ROOMS.getRoom(data.id).round.lineHistory, lineSizeHistory: ROOMS.getRoom(data.id).round.lineSizeHistory);
+        */
         socket.emit('getPainting', ROOMS.getRoom(data.id).round.lineHistory);
       }
     }
@@ -195,59 +198,53 @@ io.on("connection", socket => {
     let room = ROOMS.getSocketRoom(other);
     if(room.round != null) {
       switch(gesture) {
-        case "Upward_Lift":
+        case "Right_Tilt":
           if(room.painter == other.id) {
-            if(room.useArtistPowerUp_1(other.id) == 1){
-              CHAT.sendCallback(other, {
-                self: `Extra time successfully added!`
-              });
+            //room.increaseDrawSize()
+            socket.to(room.id).emit('increase_pen_size')
+            CHAT.sendCallback(other, {
+              self: `If not at maximum, brush was size increased!`
+            });
+          }
+          else {
+            CHAT.sendCallback(other, {
+              self: `No feature implemented for this gesture as Guesser...`
+            });
+          }
+          break;
+          case "Left_Tilt":
+          if(room.painter == other.id) {
+            //room.decreaseDrawSize()
+            socket.to(room.id).emit('increase_pen_size')
+            CHAT.sendCallback(other, {
+              self: `If not at minimum, brush was size decreased!`
+            });
+          }
+          case "Forward_Tilt":
+          if(room.painter == other.id) {
+            let room = ROOMS.getSocketRoom(socket);
+            if (room.painter == socket.id && room.round == null) {
+            room.startRound(room.wordChoices[0]);
             }
-            else{
-              CHAT.sendCallback(other, {
-                self: `You don't have this power up...`
-              });
+          }
+          case "Backward_Tilt":
+          if(room.painter == other.id) {
+            let room = ROOMS.getSocketRoom(socket);
+            if (room.painter == socket.id && room.round == null) {
+            room.startRound(room.wordChoices[2]);
             }
           }
           else {
-            if(room.useGuesserPowerUp_1(other.id) == 1){
-              CHAT.sendCallback(other, {
-                self: `Extra hint successfully added!`
-              });
-            }
-            else{
-              CHAT.sendCallback(other, {
-                self: `You don't have this power up...`
-              });
-            }
+            
+            CHAT.sendCallback(other, {
+              self: `No feature implemented for this gesture as Guesser...`
+            });
           }
           break;
-        case "Clockwise_Twist":
-          if(room.painter == other.id) {
-            if(room.useArtistPowerUp_2(other.id) == 1){
-              CHAT.sendCallback(other, {
-                self: `Revealed Hint to the Guessers!`
-              });
-            }
-            else{
-              CHAT.sendCallback(other, {
-                self: `You don't have this power up...`
-              });
-            }
-          }
-          else {
-            if(room.useGuesserPowerUp_2(other.id) == 1){
-              CHAT.sendCallback(other, {
-                self: `Successfully removed hints for everyone!`
-              });
-            }
-            else{
-              CHAT.sendCallback(other, {
-                self: `You don't have this power up...`
-              });
-            }
-          }
+          case "Idle":
+          //We just chillin.
           break;
-        case "Vertical_Chop":
+        /* case "Vertical_Chop":
           if(room.painter == other.id) {
             CHAT.sendCallback(other, {
               self: `Gesture not available for an artist...`
@@ -265,10 +262,49 @@ io.on("connection", socket => {
               });
             }
           }
-          break;
+          break; */
         default:
           console.log("Invalid Gesture");
       }
+    }
+    else if(room.round == null) {
+      switch(gesture) {
+          case "Forward_Tilt":
+            if(room.painter == other.id) {
+              room.startRound(room.wordChoices[0]);
+              }
+          case "Backward_Tilt":
+            if(room.painter == other.id) {
+              room.startRound(room.wordChoices[2]);
+              }
+          break;
+          case "Idle":
+          //We just chillin.
+          break;
+        default:
+          console.log("Invalid Gesture");
+          break;
+      }
+    }
+    else {
+      console.log("Game has not started yet...");
+    }
+  });
+
+  socket.on("hand_coordinates", coords => {
+    other = socket;
+    clients.forEach(function (cl){
+      if(socket.name == (cl.name+"8")) {
+        other = cl;
+      }
+    });
+  
+    let room = ROOMS.getSocketRoom(other);
+    if(room.round != null) {
+      console.log(coords);
+      CHAT.sendCallback(other, {
+        self: coords
+      });
     }
     else {
       console.log("Game has not started yet...");

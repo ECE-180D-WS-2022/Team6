@@ -25,7 +25,6 @@
             <td>{{room.name}}</td>
             <td>{{room.isPrivate ? 'Private 🔐' : 'Public 🌎'}}</td>
             <td>{{room.users.length}}/{{room.maxPlayers}}</td>
-            <!-- Join Room button -->
             <td class="is-paddingless">
               <router-link :to="'./room/'+room.id" class="button is-primary is-fullwidth">Join</router-link>
             </td>

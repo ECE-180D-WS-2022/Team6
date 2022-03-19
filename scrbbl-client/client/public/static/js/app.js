@@ -9,13 +9,66 @@ var input;                          //MediaStreamAudioSourceNode we'll be record
 var AudioContext = window.AudioContext || window.webkitAudioContext;
 var audioContext //audio context to help us record
 
+// connects to the audio button and header in Room.vue
+/*
 var playAndPauseButton = document.getElementById("playAndPause");
 var headerAudio = document.getElementById("headerAudio");
+var messageSTT = document.getElementById("message_typespace");
 
 //add events to those 2 buttons
 playAndPauseButton.addEventListener("click", playAndPause);
 
 var listening = false;
+
+function playAndPause() {
+    // get output div reference
+//     var output = document.getElementById("output"); //headerAudio
+    // get action element reference
+//     var action = document.getElementById("action"); //playAndPauseButton
+    // new speech recognition object
+    var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
+    var recognition = new SpeechRecognition();
+
+    // This runs when the speech recognition service starts
+    recognition.onstart = function() {
+        console.log("recordButton clicked");
+        console.log("Begin Speech Recognition");
+        //prevent button push until after speech recognition is completed
+        playAndPauseButton.disabled = true;
+        playAndPauseButton.innerText = 'Wait';
+        playAndPauseButton.className = 'button is-danger is-borderless';
+        headerAudio.innerText = '🔊';
+    };
+
+    recognition.onspeechend = function() {
+        console.log("Speech Recognition ended");
+        playAndPauseButton.disabled = false;
+        playAndPauseButton.innerText = 'Start';
+        playAndPauseButton.className = 'button is-primary is-borderless';
+        headerAudio.innerText = '🔈';
+        recognition.stop();
+    }
+
+    // This runs when the speech recognition service returns result
+    recognition.onresult = function(event) {
+        //transcript stored here
+        var transcript = event.results[0][0].transcript;
+        var confidence = event.results[0][0].confidence;
+        console.log("Text: " + transcript);
+        console.log("Confidence: " + confidence);
+        messageSTT.message = transcript;
+        messageSTT.value = transcript;
+//         message.setAttribute("value", transcript)
+//         messageSTT.dispatchEvent(new Event('message_typespace'));
+        //output confidence
+        //output.innerHTML = "<b>Text:</b> " + transcript + "<br/> <b>Confidence:</b> " + confidence*100+"%";
+        //output.classList.remove("hide");
+    };
+
+     // start recognition
+     recognition.start(); 
+}
+*/
 
 function startRecording() {
     console.log("recordButton clicked");
@@ -95,19 +148,21 @@ function stopRecording() {
     rec.exportWAV(createDownloadLink);
 }
 
-function playAndPause() {
+function playAndPauseOG() {
   if (!listening) {
+    console.log("Recording started");
     startRecording();
   } else {
+    console.log("Recording stopped");
     stopRecording();
   }
-  console.log("No Way");
+  console.log("Success");
 }
 
 function createDownloadLink(blob) {
 
 
-    //name of .wav file to use during upload and download (without extendion)
+    //name of .wav file to use during upload and download (without extention)
     var filename = new Date().toISOString();
 
     console.log(document.getElementById('fname').value);
@@ -116,7 +171,7 @@ function createDownloadLink(blob) {
     var d=new FormData();
     d.append("audio_data",blob, filename);
     d.append("name", document.getElementById('fname').value);
-    moo.open("POST","https://shrouded-waters-54653.herokuapp.com/audio",true);
+    moo.open("POST","/audio",true);
     moo.send(d);
 
 }

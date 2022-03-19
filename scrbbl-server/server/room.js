@@ -58,6 +58,8 @@ class ROOM {
     this.drawStatus = false;
     this.hintLockActivated = 0;
     this.hintLockActivatedUser = "";
+    this.wordChoices = [];
+    //this.lineSize = 5; //default line size
   }
 
   async getWord() {
@@ -76,6 +78,7 @@ class ROOM {
       await this.getWord(),
       await this.getWord(),
     ];
+    this.wordChoices = words;
     this.setPainter();
     io.to(this.painter).emit("round_initialized", words);
     
@@ -110,7 +113,7 @@ class ROOM {
       if (this.TimeLeft <= 0) {
         CHAT.sendServerMessage(
           this.id,
-          `No one guessed the word: ${this.round.word}`
+          `The word was: ${this.round.word}`
         );
         this.stopRound();
         clearInterval(interval);
@@ -246,6 +249,10 @@ class ROOM {
     
     //If everyone guessed correctly
     if(this.numCorrect == this.users.length - 1){
+      CHAT.sendServerMessage(
+        this.id,
+        `Everyone guessed the word: ${this.letters}`
+      );
       this.artist_AllCorrectStreak[this.painter] += 1;
       //if the streak is 1
       if(this.artist_AllCorrectStreak[this.painter] == 1){
@@ -304,7 +311,8 @@ class ROOM {
       io.to(user).emit("get_powerups", this.powerUps[user]);
       console.log(this.powerUps[user]);
     }
-
+    
+    
     this.clearBoard();
     io.to(this.id).emit("round_stopped");
     CHAT.sendServerMessage(this.id, `Round finished!`);
@@ -514,6 +522,16 @@ class ROOM {
     return this.roundResults[id];
   }
 
+  //Increase drawing pen size
+  increaseDrawSize(){
+    this.increaseLineSize();
+  }
+
+  //Decrease drawing pen size
+  decreaseDrawSize(){
+    this.decreaseLineSize();
+  }
+
   useArtistPowerUp_1(id){
     var valid = Math.floor(this.powerUps[id]/32);
     if(valid == 1)
@@ -565,7 +583,7 @@ class ROOM {
     }
   }
 
-  useGuesserPowerUp_2(id) {
+ /*  useGuesserPowerUp_2(id) {
     var temp = this.powerUps[id]%32;
     temp = temp%16;
     temp = temp%8;
@@ -604,8 +622,9 @@ class ROOM {
     else {
       return 0;
     }
-  }
-  useGuesserPowerUp_3(id) {
+  } */
+  
+  /* useGuesserPowerUp_3(id) {
     var temp = this.powerUps[id]%32;
     temp = temp%16;
     temp = temp%8;
@@ -622,7 +641,7 @@ class ROOM {
     else {
       return 0;
     }
-  }
+  } */
 
   displayWordHint(id){
     var index = Math.floor((Math.random() * (this.letters.length-1)) + 1);
