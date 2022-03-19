@@ -36,6 +36,6 @@ Brenden Towell <br />
 ## Acknowledgments
 
 Inspiration, code snippets, etc.
-* [awesome-readme](https://github.com/matiassingers/awesome-readme)
-* [PurpleBooth](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2)
+* [Karol Waliszewski's pictionary.io](https://github.com/Karol-Waliszewski/pictionary.io)
+* [UCLA Team 4, 2020](https://github.com/180D-FW-2020/Team4)
 
