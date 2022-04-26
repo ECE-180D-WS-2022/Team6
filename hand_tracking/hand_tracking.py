@@ -69,11 +69,8 @@ def send_coordinates():
 
         if results.multi_hand_landmarks:
             for handLms in results.multi_hand_landmarks:
-                print(
-                    f'Index finger tip coordinate: (',
-                    f'{handLms.landmark[mpHands.HandLandmark.INDEX_FINGER_TIP].x * 640}, '
-                    f'{handLms.landmark[mpHands.HandLandmark.INDEX_FINGER_TIP].y * 480})'
-                )
+                resultString = int(handLms.landmark[mpHands.HandLandmark.INDEX_FINGER_TIP].x * 640) + ',' + int(handLms.landmark[mpHands.HandLandmark.INDEX_FINGER_TIP].y * 480)
+                print(resultString)
                 sio.emit("hand_coordinates", str(handLms.landmark[mpHands.HandLandmark.INDEX_FINGER_TIP].x * 640) + ',' + str(handLms.landmark[mpHands.HandLandmark.INDEX_FINGER_TIP].y * 480))
                 for id, lm in enumerate(handLms.landmark):
                     #if id == 8:     #corresponding to tip of the index finger, see https://google.github.io/mediapipe/solutions/hands.html for reference
