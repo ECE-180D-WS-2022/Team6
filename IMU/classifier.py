@@ -55,7 +55,7 @@ def print_title():
 ░╚═══██╗██║░░██╗██╔══██╗██╔══██╗██╔══██╗██║░░░░░░░░░░╚═██╔═╝░░██║██║╚██╔╝██║██║░░░██║
 ██████╔╝╚█████╔╝██║░░██║██████╦╝██████╦╝███████╗██╗░░░░╚═╝░░░░██║██║░╚═╝░██║╚██████╔╝
 ╚═════╝░░╚════╝░╚═╝░░╚═╝╚═════╝░╚═════╝░╚══════╝╚═╝░░░░░░░░░░░╚═╝╚═╝░░░░░╚═╝░╚═════╝░                                                                                       
-Note: To stop this code, please use 'Ctrl + C' on your keyboard.""")
+Note: To stop this code, please use 'Ctrl + C' on your keyboard.\n""")
 
 
 #The MAIN beefy beefer of a function.
