@@ -55,14 +55,15 @@ def print_title():
 ░╚═══██╗██║░░██╗██╔══██╗██╔══██╗██╔══██╗██║░░░░░░░░░░╚═██╔═╝░░██║██║╚██╔╝██║██║░░░██║
 ██████╔╝╚█████╔╝██║░░██║██████╦╝██████╦╝███████╗██╗░░░░╚═╝░░░░██║██║░╚═╝░██║╚██████╔╝
 ╚═════╝░░╚════╝░╚═╝░░╚═╝╚═════╝░╚═════╝░╚══════╝╚═╝░░░░░░░░░░░╚═╝╚═╝░░░░░╚═╝░╚═════╝░                                                                                       
-Note: To stop this code, please use 'Ctrl + C' on your keyboard.\n""")
+Note: To stop this code, please use 'Ctrl + C' on your keyboard.""")
 
 
 #The MAIN beefy beefer of a function.
 def send_gestures():
     #Print an awesome ACSII Title
     print_title()
-    
+    print("\n")
+
     #Check to ensure user is already in a game room before prompting for username input and proceeding to run code.
     room_check = 1
     while room_check:
