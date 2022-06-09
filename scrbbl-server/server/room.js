@@ -59,7 +59,7 @@ class ROOM {
     this.hintLockActivated = 0;
     this.hintLockActivatedUser = "";
     this.wordChoices = [];
-    //this.lineSize = 5; //default line size
+    this.lineSize = 5; //default line size
   }
 
   async getWord() {
@@ -86,7 +86,8 @@ class ROOM {
     io.to(this.id).emit("countdown_painter", time);
     io.to(this.id).emit("get_maxRounds", this.maxRounds);
     io.to(this.id).emit("get_numRounds", Math.floor(this.numRounds / this.users.length) + 1);
-    
+    io.to(this.id).emit("reset_pen_size");
+
     let interval = setInterval(() => {
       if (this.users.length > 1) {
         if (time <= 0) {
@@ -237,6 +238,8 @@ class ROOM {
 
   stopRound() {
     this.round = null;
+    
+    //this.Whiteboard.resetLineSize();
 
     if(this.TimeLeft >= Math.floor(this.roundTime/2)){
       var temp = this.powerUps[this.painter]%32;
@@ -336,6 +339,7 @@ class ROOM {
   }
 
   clearBoard() {
+    //this.lineSize = 5;
     if (this.round != null) {
       this.round.clearLines();
     }
@@ -522,16 +526,22 @@ class ROOM {
     return this.roundResults[id];
   }
 
+
+  /* I dont think I need this anymore
   //Increase drawing pen size
   increaseDrawSize(){
-    this.increaseLineSize();
+    //io.to(this.id).emit("increase_brush");
+    io.to(this.id).emit("increase_pen_size");
+    CHAT.sendServerMessage(this.id, `You somehow called the 'increaseDrawSize' function in room.js`);
   }
 
   //Decrease drawing pen size
   decreaseDrawSize(){
-    this.decreaseLineSize();
+    //io.to(this.id).emit("decrease_brush");
+    io.to(this.id).emit("decrease_pen_size");
+    CHAT.sendServerMessage(this.id, `You somehow called the 'increaseDrawSize' function in room.js`);
   }
-
+  */
   useArtistPowerUp_1(id){
     var valid = Math.floor(this.powerUps[id]/32);
     if(valid == 1)
@@ -624,7 +634,7 @@ class ROOM {
     }
   } */
   
-  /* useGuesserPowerUp_3(id) {
+  useGuesserPowerUp_3(id) {
     var temp = this.powerUps[id]%32;
     temp = temp%16;
     temp = temp%8;
@@ -641,7 +651,7 @@ class ROOM {
     else {
       return 0;
     }
-  } */
+  } 
 
   displayWordHint(id){
     var index = Math.floor((Math.random() * (this.letters.length-1)) + 1);

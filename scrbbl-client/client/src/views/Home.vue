@@ -18,7 +18,7 @@
         <div class="hero-body">
           <div class="content">
             <h4 class="title is-3 ">How to Play!</h4>
-            <p>The maxiumum time limit per round is 180 seconds.</p>
+            <p>The maximum time limit per round is 180 seconds.</p>
             <p>At least 2 players are needed to start a game.</p>
             <h5 class="title is-5">GLHF</h5>
           </div>
@@ -32,6 +32,14 @@
         &nbsp;
         <button class="button is-primary is-large " @click="openCreator">
           <strong>Create Room</strong>
+        </button>
+        &nbsp;
+        <button class="button is-info is-large " @click="openPractice">
+          <strong>Practice</strong>
+        </button>
+        &nbsp;
+        <button class="button is-danger is-large " @click="openTutorial">
+          <strong>Tutorial</strong>
         </button>
       </div>
 
@@ -51,6 +59,21 @@ export default {
       this.$router.push({
         path: 'rooms'
       })
+    },
+    openPractice() {
+      // creates a practice room
+      // call function in App.vue
+      //this.$emit("openPracticeCreator")
+      this.$router.push({
+      path: 'practice'
+      })
+    },
+    openTutorial() {
+      this.$router.push({
+      path: 'tutorial'
+      })
+      //location.href = 'tutorial.html';
+
     }
   },
   // mounted() {

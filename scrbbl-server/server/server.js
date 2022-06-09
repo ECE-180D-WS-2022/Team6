@@ -115,6 +115,53 @@ io.on("connection", socket => {
       }
     }
   });
+  
+  socket.on("send_message_tutorial", msg => {
+    other = socket;
+    console.log(msg)
+      clients.forEach(function (cl) {
+        if (socket.name==(cl.name+"7")){
+          other = cl;
+          }
+    });
+    
+    console.log("sending message for tutorial");
+    let room = ROOMS.getSocketRoom(other);
+    if (room) {
+
+      if (true) {
+        // Checking if the message is correct
+        if (room.round.check(msg)) {
+          if(room.userGuessStatus(other.id) == 0){
+            ROOMS.givePoints(other);
+            CHAT.sendCallback(other, {
+              self: `Congratulations! You've guessed the word!`
+            });
+            CHAT.sendServerMessage(room.id, `${other.name} guessed the word`);
+            if(room.getNumGuessed() == (room.getUsers().length - 1))
+            {
+              room.stopRound();
+            }
+          }
+          else{
+            CHAT.sendCallback(other, {
+              self: `You cannot guess more than once`
+            });
+          }
+        } else {
+          CHAT.sendMessage(room.id, {
+            msg,
+            sender: other.name
+          });
+          if (room.round.isClose(msg)) {
+            CHAT.sendCallback(other, {
+              self: `You're so close!`
+            });
+          }
+        }
+      }
+    }
+  });
 
   socket.on("paint", (coords) => {
     other = socket;
@@ -124,6 +171,7 @@ io.on("connection", socket => {
         }
     });
     let room = ROOMS.getSocketRoom(other);
+
     if (room.painter == other.id && room.round != null) {
       if(room.getButtonStatus(other.id) == 1){
         if(room.getDrawStatus() == true) {
@@ -148,9 +196,25 @@ io.on("connection", socket => {
     let room = ROOMS.getSocketRoom(other);
     if (room.painter == other.id && room.round != null) {
       room.clearBoard();
+      //socket.to(room.id).emit('reset_pen_size');
     }
   });
 
+  socket.on("clear_tutorial", () => {
+    other = socket;
+    clients.forEach(function (cl) {
+      if (socket.name==(cl.name+"7")){
+        other = cl;
+        }
+    });
+    console.log("clear board tutorial");
+    let room = ROOMS.getSocketRoom(other);
+    if (room.painter == other.id) {
+      room.clearBoard();
+      //socket.to(room.id).emit('reset_pen_size');
+    }
+  });
+  
   socket.on("word_chosen", word => {
     let room = ROOMS.getSocketRoom(socket);
     if (room.painter == socket.id && room.round == null) {
@@ -198,62 +262,17 @@ io.on("connection", socket => {
     let room = ROOMS.getSocketRoom(other);
     if(room.round != null) {
       switch(gesture) {
-        case "Right_Tilt":
+        case "Right_Tilt": //Right Gesture
           if(room.painter == other.id) {
-            //room.increaseDrawSize()
-            socket.to(room.id).emit('increase_pen_size')
+            socket.to(room.id).emit('increase_pen_size');  
             CHAT.sendCallback(other, {
-              self: `If not at maximum, brush was size increased!`
-            });
-          }
-          else {
-            CHAT.sendCallback(other, {
-              self: `No feature implemented for this gesture as Guesser...`
-            });
-          }
-          break;
-          case "Left_Tilt":
-          if(room.painter == other.id) {
-            //room.decreaseDrawSize()
-            socket.to(room.id).emit('increase_pen_size')
-            CHAT.sendCallback(other, {
-              self: `If not at minimum, brush was size decreased!`
-            });
-          }
-          case "Forward_Tilt":
-          if(room.painter == other.id) {
-            let room = ROOMS.getSocketRoom(socket);
-            if (room.painter == socket.id && room.round == null) {
-            room.startRound(room.wordChoices[0]);
-            }
-          }
-          case "Backward_Tilt":
-          if(room.painter == other.id) {
-            let room = ROOMS.getSocketRoom(socket);
-            if (room.painter == socket.id && room.round == null) {
-            room.startRound(room.wordChoices[2]);
-            }
-          }
-          else {
-            
-            CHAT.sendCallback(other, {
-              self: `No feature implemented for this gesture as Guesser...`
-            });
-          }
-          break;
-          case "Idle":
-          //We just chillin.
-          break;
-        /* case "Vertical_Chop":
-          if(room.painter == other.id) {
-            CHAT.sendCallback(other, {
-              self: `Gesture not available for an artist...`
+              self: 'Brush size increased.'
             });
           }
           else {
             if(room.useGuesserPowerUp_3(other.id) == 1){
               CHAT.sendCallback(other, {
-                self: `Extra 💯 points will be added to your score!`
+                self: `Extra 100 points will be added to your score!`
               });
             }
             else{
@@ -262,9 +281,63 @@ io.on("connection", socket => {
               });
             }
           }
-          break; */
-        default:
+          break;
+
+          case "Left_Tilt": //Left Gesture
+          if(room.painter == other.id) {
+            socket.to(room.id).emit('decrease_pen_size');
+            CHAT.sendCallback(other, {
+              self: 'Brush size decreased.'
+            });
+          }
+          else {
+            if(room.useGuesserPowerUp_3(other.id) == 1){
+              CHAT.sendCallback(other, {
+                self: `Extra 100 points will be added to your score!`
+              });
+            }
+            else{
+              CHAT.sendCallback(other, {
+                self: `You don't have this power up...`
+              });
+            }
+          }
+          break;
+
+          case "Forward_Tilt": //Forward Gesture
+          if(room.painter == other.id) {
+            
+          }
+          else {
+            if(room.useGuesserPowerUp_1(other.id) == 1){
+              CHAT.sendCallback(other, {
+                self: `Extra word hint provided!`
+              });
+            }
+            else{
+              CHAT.sendCallback(other, {
+                self: `You don't have this power up...`
+              });
+            }
+          }
+          break;
+
+          case "Backward_Tilt": //Backward Gesture
+          if(room.painter == other.id) {
+           
+          }
+          else {
+            socket.to(room.id).emit('start_speech');
+          }
+          break;
+
+          case "Idle": //Idle Gesture
+          //We just chillin.
+          break;
+
+          default:
           console.log("Invalid Gesture");
+          break;
       }
     }
     else if(room.round == null) {
@@ -273,9 +346,20 @@ io.on("connection", socket => {
             if(room.painter == other.id) {
               room.startRound(room.wordChoices[0]);
               }
+              break;
           case "Backward_Tilt":
             if(room.painter == other.id) {
               room.startRound(room.wordChoices[2]);
+              }
+              break;
+          case "Left_Tilt":
+            if(room.painter == other.id) {
+              room.startRound(room.wordChoices[1]);
+              }
+            break;
+          case "Right_Tilt":
+            if(room.painter == other.id) {
+              room.startRound(room.wordChoices[1]);
               }
           break;
           case "Idle":
@@ -291,6 +375,20 @@ io.on("connection", socket => {
     }
   });
 
+  /* IDK IF THIS WORKS
+  socket.on("update_brush_size", size => {
+    other = socket;
+    clients.forEach(function (cl){
+      if(socket.name == (cl.name+"8")) {
+        other = cl;
+      }
+    });
+
+    CHAT.sendCallback(other, {
+      self: `Brush size set to` + toString(size)
+    });
+  });
+*/
   socket.on("hand_coordinates", coords => {
     other = socket;
     clients.forEach(function (cl){
@@ -298,16 +396,29 @@ io.on("connection", socket => {
         other = cl;
       }
     });
-  
+    let obj = {x : coords[0], y : coords[1]};
     let room = ROOMS.getSocketRoom(other);
-    if(room.round != null) {
-      console.log(coords);
+    if(room.round != null && other.id == room.painter) {
+      console.log(inputCoords);
       CHAT.sendCallback(other, {
         self: coords
       });
     }
     else {
-      console.log("Game has not started yet...");
+      console.log("oop hands should not be getting tracked");
+      CHAT.sendCallback(other, {
+        self: "either round hasn't started or you aren't the drawer"
+      });
+    }
+    if (room.painter == other.id && room.round != null) {
+      if(room.getButtonStatus(other.id) == 1){
+        if(room.getDrawStatus() == true) {
+          socket.to(room.id).emit('handCoords', obj);
+        }
+      }
+      else{
+        socket.to(room.id).emit('handCoords', obj);
+      }
     }
   });
 });

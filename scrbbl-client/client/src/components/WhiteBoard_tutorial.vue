@@ -56,6 +56,7 @@
 </template>
 
 <script>
+console.log("imports");
 import { Hands } from "@mediapipe/hands";
 import { Camera } from "@mediapipe/camera_utils";
 export default {
@@ -78,7 +79,6 @@ export default {
       ctx: null,
       draw: false,
       size: null, //default value for drawing line size
-      allowHandDrawing: false,
     };
   },
   computed: {
@@ -92,14 +92,11 @@ export default {
       this.ctx = this.$refs.canvas.getContext("2d");
       this.ctx.lineJoin = "round";
       this.size = 5;
-
       const videoElement = document.getElementsByClassName('input_video')[0];
       videoElement.style.display = "none";
-
       const hands = new Hands({locateFile: (file) => {
         return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
       }});
-
       hands.setOptions({
         maxNumHands: 1,
         modelComplexity: 1,
@@ -107,7 +104,6 @@ export default {
         minTrackingConfidence: 0.5
       });
       hands.onResults(this.onResults);
-
       const camera = new Camera(videoElement, {
         onFrame: async () => {
           await hands.send({image: videoElement});
@@ -118,62 +114,56 @@ export default {
       camera.start();
     },
     onResults(results) {
-      console.log(this.iDraw);
-      if(this.allowHandDrawing){
-        if (results.multiHandLandmarks) {
-          for (const landmarks of results.multiHandLandmarks) {
-            let scaledPos = { x: 800 - parseInt(1600*(landmarks[8].x - 0.25), 10), y: parseInt(1200*(landmarks[8].y-0.25), 10)};
-            let canvas = document.getElementsByClassName("overlay")[0];
-            let ctx = canvas.getContext("2d");        // apparently this line is throwing errors?
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.beginPath();
-            ctx.strokeStyle = "#000";
-            ctx.globalAlpha = 0.5;
-            ctx.arc(scaledPos.x - 50, scaledPos.y, 25, 0, 2 * Math.PI);
-            ctx.stroke();
-            
-            if(landmarks[8].x > 0.75 || landmarks[8].x < 0.25 || landmarks[8].y > 0.75 || landmarks[8].y < 0.25){
-              this.prevPos.x = null;
-              this.prevPos.y = null;
-              break;
-            }
-            if(Math.sqrt((landmarks[8].x - landmarks[4].x)**2 + (landmarks[8].y - landmarks[4].y)**2) > 0.1){
-              console.log("fingers separated");
-              this.prevPos.x = null;
-              this.prevPos.y = null;
-              break;
-            }
-
-            
-            if (this.prevPos.x != null && this.prevPos.y != null && this.started) {
-              let coords = { prevPos: this.prevPos, currPos: scaledPos };
-              let paintObj = { color: this.activeColor, coords };
-              this.$socket.emit("paint", paintObj);
-              this.drawLine(paintObj);
-            }
-            // New previous pos
-            this.prevPos.x = scaledPos.x;
-            this.prevPos.y = scaledPos.y;
-            console.log(scaledPos.x + " " + scaledPos.y);
-          }
-        }
-        else{
-          this.prevPos.x = null;
-          this.prevPos.y = null;
+      if (results.multiHandLandmarks) {
+        for (const landmarks of results.multiHandLandmarks) {
+          let scaledPos = { x: 800 - parseInt(1600*(landmarks[8].x - 0.25), 10), y: parseInt(1200*(landmarks[8].y-0.25), 10)};
           let canvas = document.getElementsByClassName("overlay")[0];
           let ctx = canvas.getContext("2d");
           ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.beginPath();
+          ctx.strokeStyle = "#000";
+          ctx.globalAlpha = 0.5;
+          ctx.arc(scaledPos.x - 50, scaledPos.y, 25, 0, 2 * Math.PI);
+          ctx.stroke();
+          
+          if(landmarks[8].x > 0.75 || landmarks[8].x < 0.25 || landmarks[8].y > 0.75 || landmarks[8].y < 0.25){
+            this.prevPos.x = null;
+            this.prevPos.y = null;
+            break;
+          }
+          if(Math.sqrt((landmarks[8].x - landmarks[4].x)**2 + (landmarks[8].y - landmarks[4].y)**2) > 0.1){
+            console.log("fingers separated");
+            this.prevPos.x = null;
+            this.prevPos.y = null;
+            break;
+          }
+          
+          if (this.prevPos.x != null && this.prevPos.y != null && this.started) {
+            let coords = { prevPos: this.prevPos, currPos: scaledPos };
+            let paintObj = { color: this.activeColor, coords };
+            this.$socket.emit("paint", paintObj);
+            this.drawLine(paintObj);
+          }
+          // New previous pos
+          this.prevPos.x = scaledPos.x;
+          this.prevPos.y = scaledPos.y;
+          console.log(scaledPos.x + " " + scaledPos.y);
         }
-
+      }
+      else{
+        this.prevPos.x = null;
+        this.prevPos.y = null;
+        let canvas = document.getElementsByClassName("overlay")[0];
+        let ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
     },
     clearBoard() {
-      this.$socket.emit("clear");
+      this.$socket.emit("clear_tutorial");
     },
     increaseLineSize() //Increase drawing line size by 5
     {
       this.ctx.lineWidth += 25;
-
       newLineSize = this.size + 25;
       this.size = newLineSize;
       
@@ -182,7 +172,6 @@ export default {
     decreaseLineSize() //Decrease drawing line size by 5
     {
       this.ctx.lineWidth -= 25; 
-
       newLineSize = this.size - 25;
       if(newLineSize > 0) {
         this.size = newLineSize;
@@ -214,7 +203,6 @@ export default {
     emitLine(e) {
       if (this.draw && this.iDraw) {
         let pos = this.getCanvasPosition(this.$refs.canvas, e);
-
         if (this.prevPos.x != null && this.prevPos.y != null && this.started) {
           let coords = { prevPos: this.prevPos, currPos: pos };
           let paintObj = { color: this.activeColor, coords };
@@ -230,7 +218,6 @@ export default {
       console.log("emitLineByHand in WhiteBoard.vue getting called");
       if(this.draw && this.iDraw){
         let pos = coords;
-
         if (this.prevPos.x != null && this.prevPos.y != null && this.started) {
           let coords = { prevPos: this.prevPos, currPos: pos };
           let paintObj = { color: this.activeColor, coords };
@@ -270,7 +257,6 @@ export default {
       var rect = canvas.getBoundingClientRect(),
         scaleX = canvas.width / rect.width,
         scaleY = canvas.height / rect.height;
-
       return {
         x: (evt.clientX - rect.left) * scaleX,
         y: (evt.clientY - rect.top) * scaleY,
@@ -282,7 +268,6 @@ export default {
       window.addEventListener("touchstart", this.enableDrawing);
       window.addEventListener("mouseup", this.disableDrawing);
       window.addEventListener("touchend", this.disableDrawing);
-      this.allowHandDrawing = true;
     },
     removeEvents() {
       //window.addEventListener("keydown", this.increaseLineSize); //debugging
@@ -290,7 +275,6 @@ export default {
       window.removeEventListener("touchstart", this.enableDrawing);
       window.removeEventListener("mouseup", this.disableDrawing);
       window.removeEventListener("touchend", this.disableDrawing);
-      this.allowHandDrawing = false;
     },
   },
   watch: {
@@ -361,7 +345,6 @@ export default {
   display: flex;
   flex-direction: column;
 }
-
 .whiteboard {
   width: 100%;
   height: 100%;
@@ -371,13 +354,11 @@ export default {
     min-height: 590px;
   }
 }
-
 .whiteboard-footer {
   /* display: flex;
   flex-direction: column;
   padding: 1rem; */
 }
-
 .color {
   padding-bottom: 100%;
   border-radius: 4px;

@@ -1,8 +1,8 @@
 <template>
   <div id="app" class="app">
-    <navigation @openCreator="openCreator" />
+    <navigation @openCreator="openPracticeCreator" />
     <div class="main">
-      <router-view @openCreator="openCreator" />
+      <router-view @openCreator="openPracticeCreator" />
     </div>
     <room-creator
       :isVisible="isModalVisible"
@@ -18,7 +18,7 @@ import RoomCreator from "./components/RoomCreator.vue";
 import PracticeRoomCreator from "./components/PracticeRoomCreator.vue";
 
 export default {
-  name: "App",
+  name: "PracticeApp",
   data() {
     return { users: [], isModalVisible: false, name: null };
   },
@@ -31,9 +31,6 @@ export default {
   methods: {
     leaveRoom() {
       this.$socket.emit("leave_room");
-    },
-    openCreator() {
-      this.$data.isModalVisible = true;
     },
     openPracticeCreator() {
       this.$data.isModalVisible = true;

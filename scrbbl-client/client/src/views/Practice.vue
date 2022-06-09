@@ -7,10 +7,11 @@ script: [
 ]
 }-->
 
+<!--this file is a copy of room.vue-->
+
 <template>
   <div class="section-xs container">
     <div class="columns is-multiline">
-    <!-- start: timer -->
       <div class="column is-full">
         <h1 class="title is-2 has-text-centered has-text-primary" id="Title" v-if="room">
           {{ room.name.toUpperCase() }}
@@ -25,11 +26,10 @@ script: [
           <span class="hint-word">{{ wordHint.toUpperCase() }}</span>
         </h2>
       </div>
-      <!-- end: timer -->
-      
-      <!-- start: leaderboard -->
+
       <div class="column is-3">
         <div class="card">
+          <!--
           <header class="card-header">
             <p class="card-header-title"> Leaderboard 🏆 <span v-if="room && wordHint"> &nbsp; Round {{numRounds}} of {{maxRounds}}</span></p>
           </header>
@@ -48,18 +48,16 @@ script: [
                 <span class="has-text-weight-bold">{{ user.points }}</span>
               </li>
             </ul>
-          </div>
+          </div> -->
           <footer class="card-footer">
             <router-link
-              to="/rooms"
+              to="/"
               class="card-footer-item has-text-danger is-hoverable"
               >Leave Room</router-link
             >
           </footer>
         </div>
-        <!-- end: leaderboard -->
 
-        <!-- start: powerups -->
         <!-- <div class="card card--painter">
           <header class="card-header">
             <p class="card-header-title">⚡</p>
@@ -83,20 +81,21 @@ script: [
             </ul>
           </div>
         </div> -->
-        <!-- end: powerups -->
-
-        <!-- start: word chooser -->
         <div
           class="card card--painter"
-          v-if="iDraw && !roundStarted && words.length > 0"
-        >
+          v-if="true"
+        > 
+    
           <header class="card-header">
             <div class="card-header-title">
-              <p>Choose next word...</p> 
-              <span v-if="wordTime < 10" class="has-text-danger">{{ wordTime }}</span>
-              <span v-else>{{ wordTime }}</span>
+              <p>Tilt IMU to select word <br>
+                Forward Tilt: Select Word 1 <br>
+                Backward Tilt: Select Word 3 <br>
+                Leftward or Rightward Tilt: Select Word 2
+              </p> 
             </div>
           </header>
+          <!--
           <div class="card-content">
             <ul class="content">
               <li v-for="word in words" :key="word">
@@ -112,11 +111,25 @@ script: [
                 </button>
               </li>
             </ul>
-          </div>
+          </div> -->
         </div>
-        <!-- end: word chooser -->
 
-        <!-- start: word chosen -->
+        <div
+          class="card card--painter"
+          v-if="true"
+        > 
+    
+          <header class="card-header">
+            <div class="card-header-title">
+              <p>Tilt IMU to change brush size when drawing <br>
+                Leftward Tilt: Decrease Brush Size <br>
+                Rightward Tilt: Increase Brush Size
+              </p> 
+            </div>
+          </header>
+        </div>
+
+        <!--
         <div class="card card--painter" v-if="iDraw && roundStarted">
           <header class="card-header">
             <div class="card-header-title">
@@ -126,10 +139,8 @@ script: [
           <div class="card-content">
             <p class="content">{{ password }}</p>
           </div>
-        </div>
-        <!-- end: word chose -->
-        
-        <!-- start: show video -->
+        </div> -->
+
         <!-- <div class="card card--painter">
           <header class="card-header card-video">
             <p id="headerVideo" class="card-header-title">📷</p>
@@ -146,12 +157,10 @@ script: [
             <video id="videoInput" width=320 height=240 hidden></video>
           </div>
         </div> -->
-        <!-- end: show video -->
       </div>
 
       <whiteboard id="whiteboardID" :iDraw="iDraw" :started="roundStarted"/>
 
-      <!-- start: chat -->
       <div class="column is-3" id="chat">
         <div class="card chat">
           <header class="card-header">
@@ -207,9 +216,20 @@ script: [
             </form>
           </footer>
         </div>
-        <!-- end: chat -->
 
-        <!-- start: audio -->
+        <div
+        class="card card--painter"
+        v-if="true"
+        > 
+  
+          <header class="card-header">
+            <div class="card-header-title">
+              <p>To guess a word, click the start button and say your guess.
+              </p> 
+            </div>
+          </header>
+        </div>
+
         <div class="card card--painter">
           <header class="card-header card-audio">
             <p id="headerAudio" class="card-header-title">🔈</p>
@@ -219,11 +239,8 @@ script: [
                 class = "button is-primary is-borderless"
                 @click="
                     () => {
-                      var pressed = stt_button_pressed();
-                      if(!pressed){
-                        stt();
-                        stt_word();
-                      };
+                      stt();
+                      stt_word();
                     }
                   "
                 >
@@ -232,8 +249,9 @@ script: [
             </div>
           </header>
         </div>
-        <!-- end: audio -->
       </div>
+      
+      <!--place to put notes w/speechrec-->
       
       <div class="column is-full">
         <p class="subtitle is-4 has-text-centered has-text-weight-bold" id="note"></p>
@@ -264,7 +282,7 @@ script: [
 </template>
 
 <script>
-import Whiteboard from "../components/WhiteBoard";
+import Whiteboard from "../components/WhiteBoard_tutorial";
 export default {
   name: "About",
   data() {
@@ -273,13 +291,15 @@ export default {
       showUsers: false,
       room: null,
       message: "",
-      message_stt: "",
+      voice_message: "",
       messages: [],
       painter: null,
       words: [],
-      iDraw: false,
+     // iDraw: false,
+      iDraw: true,
       password: null,
-      roundStarted: false,
+      roundStarted: true,
+      // roundStarted: false,
       time: 0,
       wordTime: 0,
       numRounds: 0,
@@ -366,7 +386,7 @@ export default {
     sendMessage(e) {
       e.preventDefault();
       if (this.message.length != 0) {
-        this.$socket.emit("send_message", this.message);
+        this.$socket.emit("send_message_tutorial", this.message);
         this.message = "";
       }
     },
@@ -389,7 +409,6 @@ export default {
       var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
       var recognition = new SpeechRecognition();
       var this_message = "";
-      var notes = document.getElementById("note");
 
       recognition.onstart = function() {
         console.log("recordButton clicked");
@@ -408,17 +427,6 @@ export default {
         headerAudio.innerText = '🔈';
         recognition.stop();
       };
-      
-      //if error is thrown stop recognition and reset
-      recognition.addEventListener('error', function(event) {
-        console.log('Speech recognition error detected: ' + event.error);
-        playAndPauseButton.disabled = false;
-        playAndPauseButton.innerText = 'Start';
-        playAndPauseButton.className = 'button is-primary is-borderless';
-        headerAudio.innerText = '🔈';
-        recognition.stop();
-        playAndPauseButton.disabled = false;
-      });
 
       recognition.onresult = function(event) {
         var transcript = event.results[0][0].transcript;
@@ -427,27 +435,20 @@ export default {
         console.log("Confidence: " + confidence);
         messageSTT.value = transcript;
         this_message = transcript;
-        notes.innerHTML = this_message;
+        this.message = this_message;
       };
 
       recognition.start();
-      console.log("disabled: " + playAndPauseButton.disabled);
+      this.message = this_message;
+      this.$socket.emit("send_message", "I'm using speech recognition software!");
     },
     stt_word() {
-      var notes = document.getElementById("note");
-      if(notes.innerHTML==="") {//we want it to not be empty
-        setTimeout(this.stt_word, 50);//wait 50 milliseconds then recheck
+      console.log("wait for message to update");
+      if(this.message==="") {//we want it to not be empty
+        setTimeout(stt_word(), 50);//wait 50 milliseconds then recheck
         return;
       }
-      if(notes.innerHTML != 0) {
-        this.$socket.emit("send_message", notes.innerHTML);
-        notes.innerHTML = "";
-      }
-    },
-    stt_button_pressed() {
-      var playAndPauseButton = document.getElementById("playAndPause");
-      console.log(playAndPauseButton.disabled);
-      return playAndPauseButton.disabled;
+      console.log("after stt"+this.message);
     },
     stt_lamer() {
       var playAndPauseButton = document.getElementById("playAndPause");
@@ -490,7 +491,8 @@ export default {
   },
   sockets: {
     receive_users(users) {
-      this.users = users;
+      // hardcode users to 1
+      this.users = 1;
     },
     receive_users_error(msg) {
       this.$swal({ title: msg, type: "error" });
@@ -500,15 +502,10 @@ export default {
       this.$router.push("/rooms");
     },
     receive_room(room) {
-      if (room) {
         this.room = room;
         this.setPainter(room.painter);
         this.getUsers();
         this.joinRoom();
-      } else {
-        this.$swal({ title: "This room doesn't exist.", type: "error" });
-        this.$router.push("/rooms");
-      }
     },
     receive_message(msgObj) {
       if (msgObj && msgObj.msg && msgObj.msg.length) {
@@ -539,7 +536,7 @@ export default {
       this.words = [];
     },
     round_stopped() {
-      this.roundStarted = false;
+      this.roundStarted = true;
     },
     game_ended() {
       this.$swal({ 
@@ -566,23 +563,16 @@ export default {
     receive_hint(wordHint) {
       this.wordHint = wordHint;
     },
-    /*
-    reset_pen_size() {
-      this.Whiteboard.resetLineSize();
-    },
     increase_brush() {
       this.Whiteboard.increaseLineSize();
     },
     decrease_brush() {
       this.Whiteboard.decreaseLineSize();
-    },*/
-    start_speech() {
-      if(!this.stt_button_pressed()) {
-        this.stt();
-        this.stt_word();
-      }
     },
-    get_powerups(points) {
+    start_speech() {
+      this.stt();
+    },
+    /* get_powerups(points) {
       var power_list = ['Extend Time ⏳','Reveal Hint to Guessers 👁️','Double Points ✌️','Reveal Hint 👁️','Remove Hints ❌','Extra 💯 Points'];
       var guesser = [];
       var artist = [];
@@ -603,7 +593,7 @@ export default {
       this.artistUps = artist;
 
       this.guesserUps = guesser;
-    }, 
+    }, */
   },
   computed: {
     sortedUsers() {

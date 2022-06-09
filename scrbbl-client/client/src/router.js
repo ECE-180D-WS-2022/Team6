@@ -17,11 +17,25 @@ export default new Router({
       component: () =>
         import("./views/Rooms.vue")
     },
+// link Practice.vue file to /practice path
+    {
+      path: "/practice",
+      name: "practice",
+      component: () =>
+        import("./views/Practice.vue")
+    },
+
     {
       path: "/room/:id",
       name: "room",
       component: () =>
         import("./views/Room.vue")
+    },
+    {
+      path: "/tutorial",
+      name: "tutorial",
+      component: () =>
+        import("./views/Tutorial.vue")
     }
   ]
 });
